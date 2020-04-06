@@ -5,7 +5,7 @@
 #include <signal.h>
 #include <time.h>
 
-unsigned int ns[] = { 10, /* TODO: fill values which will be used as lists' sizes */ };
+unsigned int ns[] = { 1000, 5000, 10000, 20000, 30000, 40000, 45000, 60000};
 
 // each tree node contains an integer key and pointers to left and right children nodes
 struct node {
@@ -17,30 +17,69 @@ struct node {
 // tree's beginning is called the root
 struct node *root = NULL;
 
+
+
 struct node **tree_search(struct node **candidate, int value) {
-    // TODO: implement
-    return NULL;
+    if (*candidate==NULL){
+        return candidate;
+    }
+    if (value<(*candidate)->key){                            //jezeli szukana wartosc jest mniejsza od tej w drzewie, dalej przeszukiwana jest lewa czesc
+        return tree_search(&(*candidate)->left, value);
+    }
+    if (value>(*candidate)->key){                            //jezeli szukana wartosc jest wieksza od tej w drzewie, dalej przeszukiwana jest prawa czesc
+        return tree_search(&(*candidate)->right, value);
+    }
+    return candidate;
 }
 
+
+//tutaj móglby byc void
 struct node* tree_insert(int value) {
-    // TODO: implement
-    return NULL;
+    struct node **candidate;
+    candidate = tree_search(&root, value);
+    struct node *createNODE = malloc(sizeof(*createNODE));
+    createNODE->key=value;                                 //dodanie wskaznika na nowy element
+    createNODE->left = NULL;
+    createNODE->right = NULL;
+    *candidate = createNODE;
 }
 
 
 
-struct node **tree_maximum(struct node **candidate) {
-    // TODO: implement
-    return NULL;
+struct node **tree_maximum(struct node **candidate) {   //wyszukanie elementu o najwyższej wartości
+    if ((*candidate)->right != NULL){
+        return tree_maximum(&(*candidate)->right);
+    }
+    return candidate;
 }
 
 void tree_delete(int value) {
-    // TODO: implement
+    struct node **candidate;
+    candidate = tree_search(&root, value);
+    if (((*candidate)->left == NULL) && ((*candidate)->right == NULL)){
+        *candidate = NULL;                  //usuwanie elementu bez wezlów potomnych
+    }
+    else if (((*candidate)->left!=NULL) && ((*candidate)->right == NULL)){
+        *candidate = (*candidate)->left;      //usuwanie elementu z wezlem potomnym po lewej stronie
+    }
+    else if (((*candidate)->left == NULL) && ((*candidate)->right!=NULL)){
+        *candidate = (*candidate)->right;     //usuwanie elementu z wezlem potomnym po prawej stronie
+    }
+    else {
+        struct node **maxnodeptr;
+        maxnodeptr = tree_maximum(&(*candidate)->left);  //wyszuka element o najwyzszej wartosci po lewej stronie drzewa
+        (*candidate)->key = (*maxnodeptr)->key;
+        *maxnodeptr = (*maxnodeptr)->left;
+    }
 }
 
-unsigned int tree_size(struct node *element) {
-    // TODO: implement
-    return 0;
+unsigned int tree_size(struct node *element) {   //liczba elementów w drzewie
+    if (element==NULL){
+        return 0;
+    }
+    else {
+        return 1+tree_size(element->left)+tree_size(element->right);
+    }
 }
 
 /*
@@ -105,6 +144,8 @@ bool is_bst(struct node *element) {
         && is_bst(element->right);
 }
 
+
+
 void insert_increasing(int *t, int n) {
     for (int i = 0; i < n; i++) {
         tree_insert(t[i]);
@@ -118,8 +159,25 @@ void insert_random(int *t, int n) {
     }
 }
 
-void insert_binary(int *t, int n) {
-    // TODO: implement
+
+void tree_insert_biject(int *t, int p, int r) {
+    if (p==r){
+        tree_insert(t[p]);
+    }
+    else if (r-p==1){
+        tree_insert(t[p]);
+        tree_insert(t[r]);
+    }
+    else{
+        int q=p+(r-p)/2;
+        tree_insert(t[q]);
+        tree_insert_biject(t, p, q-1);
+        tree_insert_biject(t, q+1, r);
+    }
+}
+
+void insert_binary (int *t, int n){           //utworzenie drzewa zrównowazonego
+    tree_insert_biject(t, 0, n-1);
 }
 
 char *insert_names[] = { "Increasing", "Random", "Binary" };
