@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-unsigned int ns[] = { 10, /* TODO: fill values which will be used as lists' sizes */ };
+unsigned int ns[] = { 1000, 5000, 10000, 20000, 30000, 40000, 45000, 60000};
 
 // each list node contains an integer key value and pointer to next list node
 struct node {
@@ -16,23 +16,50 @@ struct node {
 struct node *head = NULL;
 
 
-struct node* list_insert(int value) {
-    // TODO: implement
-    return NULL;
+struct node* createNODE(int value, struct node *top) {      //tworzenie nowego wezla, elementu listy
+    struct node* newItem = malloc(sizeof(struct node));
+    newItem->key = value;
+    newItem->next = top;
+    return newItem;
 }
 
-struct node* list_search(int value) {
-    // TODO: implement
-    return NULL;
+struct node* list_insert(int value) {      //dodanie elementu na poczatek listy
+    struct node* newItem = malloc(sizeof(struct node));
+    head = createNODE(value, head);
+    return head;
+}
+
+struct node* list_search(int value) {     //szukanie elementu od poczatku listy
+    struct node *iter = head;
+    while ((iter != NULL) && (iter->key != value)) {
+        iter = iter->next;
+    }
+    return iter;
 }
 
 void list_delete(int value) {
-    // TODO: implement
+    if (head->key == value) {    //usuwanie pierwszego elementu z listy
+        head=head->next;
+    }
+    else {
+        struct node* prev = head;     //usuwanie elementu w srodku listy
+        struct node* iter = head->next;
+        while ((iter != NULL) && (iter->key != value)) {
+            prev = iter;
+            iter = iter->next;
+        }
+        if (iter != NULL) {prev->next = iter->next;}
+    }
 }
 
-unsigned int list_size() {
-    // TODO: implement
-    return 0;
+unsigned int list_size() {      //liczba elementów na liscie
+    int size = 0;
+    struct node* iter = head;
+    while (iter != NULL){
+        size= size +1;
+        iter = iter ->next;
+    }
+    return size;
 }
 
 /*
